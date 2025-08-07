@@ -2,13 +2,32 @@
 
 // Define LCD pin connections: RS, E, D4, D5, D6, D7
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+// Define pin connections: A0, 7, 9, 6, 8, 13 
 const int sensorPin = A0;
+const int yellowLEDPin = 7;
+const int redLEDPin = 9;
+const int blueLEDPin = 6;
+const int backlightPin = 8;
+const int textPin = 13;
+char tempText[] = "Warm";
+int delayTime = 0;
+int breakDelay = 0;
 void setup() {
   Serial.begin(9600);
-  
+  pinMode(textPin, OUTPUT); // Set contrast as output
+
+  // Set LEDs as output
+  pinMode(blueLEDPin, OUTPUT);
+  pinMode(backlightPin, OUTPUT);
+  pinMode(yellowLEDPin, OUTPUT);
+  pinMode(redLEDPin, OUTPUT);
+
+  digitalWrite(textPin, LOW); // Write to the LCD contrast
+  digitalWrite(backlightPin, HIGH); // Write to the LCD backlight
+
   // Initialize the LCD with 16 columns and 2 rows
   lcd.begin(16, 2);
-
   // Print the start up messages
   lcd.setCursor(5, 0);
   lcd.print("Weather");
@@ -18,54 +37,75 @@ void setup() {
   lcd.print((char)223);
 
   lcd.print("C");
-  lcd.setCursor(0, 0);
-  delay(1000);
+  lcd.home(); // Go to the first line
+  delay(1000); // Pause to allow time to read
   lcd.clear();
   lcd.print("Accurate feels");
-  lcd.setCursor(0, 1);
+  lcd.setCursor(0, 1); // Go to the second line
   lcd.print("like temperature");
   delay(1400);
-  // Clear the display for Temperature reading
-  lcd.clear();
+  lcd.clear(); // Clear the display for Temperature reading
+  
+  // Declare the delays
+  delayTime = 1000;
+  breakDelay = 800;
 
+  lcd.clear(); // Clear the screen
+  delay(1300);
+
+
+  digitalWrite(backlightPin, HIGH); // turning the backlighting on
+  digitalWrite(textPin, LOW); // Turning the text on
 }
 
 void loop() {
-  // Read the temperature sensor
-  int sensorVal = analogRead(sensorPin);
-
-  // Get the sensor value
-  Serial.print("Sensor Value: ");
+  digitalWrite(backlightPin, HIGH); // Enforcing backlight
+  digitalWrite(textPin, LOW); // Enforcing text
+  int sensorVal = analogRead(sensorPin); // Read the temperature sensor
+  Serial.print("Sensor Value: "); // Get the sensor value
   Serial.print(sensorVal);
-
-  // Calculate the voltage
-  float voltage = (sensorVal/1024.0) * 5.0;
+  float voltage = (sensorVal/1024.0) * 5.0; // Calculate the voltage
   Serial.print(", Volts: ");
   Serial.print(voltage);
+  Serial.print(", Degrees C: ");
+  float celsius = (voltage - .5) * 100; // Calculate the celsius degrees
+  Serial.print(celsius);
 
-  Serial.print(", degrees C: ");
-  // Calculate the Celcius degrees
-  float celcius = (voltage - .5) * 100;
-  Serial.print(celcius);
-  
-    // Set the line to the first line
-    lcd.setCursor(0, 0);
+      lcd.home();
 
-    // Print "Temperature"
-    lcd.print("Temperature");
+      // Print "Temperature"
+      lcd.print("Temp: ");
 
-    // Move to the second line
-    lcd.setCursor(0, 1);
+      // Move to the second line
+      lcd.setCursor(0, 1);
 
-    // Print the celcius temperature
-    lcd.print(celcius);
+      // Print the celsius temperature
+      lcd.print(celsius);
 
-    //Print the degrees symbol
-    lcd.print((char)223);
-    lcd.print("C");
-    // Delay and repeat to update the temperature
-    delay(1000);
-    lcd.clear();
-  
- 
+      //Print the degrees symbol
+      //lcd.print((char)223);
+      lcd.print("C");
+
+      // Delay and repeat to update the temperature
+      delay(500);
+      lcd.clear();
+
+       Serial.print(", Temperature: ");
+    if (celsius < 17) {
+      digitalWrite(redLEDPin, LOW);
+      digitalWrite(yellowLEDPin, LOW); 
+      digitalWrite(blueLEDPin, HIGH); // Cold
+      Serial.print("cold | ");
+    } else if (celsius >= 17 && celsius < 25) {
+      digitalWrite(blueLEDPin, LOW);
+      digitalWrite(yellowLEDPin, HIGH); // Warm
+      digitalWrite(redLEDPin, LOW);
+      Serial.print("warm | ");
+    } else {
+      digitalWrite(redLEDPin, HIGH); // Hot
+      digitalWrite(yellowLEDPin, LOW);
+      digitalWrite(blueLEDPin, LOW);
+      Serial.print("hot | ");
+    } 
+    Serial.println();
 }
