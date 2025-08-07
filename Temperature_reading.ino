@@ -83,7 +83,7 @@ void loop() {
       lcd.print(celsius);
 
       //Print the degrees symbol
-      //lcd.print((char)223);
+      lcd.print((char)223);
       lcd.print("C");
 
       // Delay and repeat to update the temperature
