@@ -4,7 +4,7 @@
 
 
 ## THINGS YOU WILL NEED:
-1x Arduino UNO \
+1x Arduino UNO R3\
 1x Breadboard\
 1x LCD 16x2\
 1x Blue LED\
